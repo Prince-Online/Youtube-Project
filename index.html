@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@350&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Josefin Sans', sans-serif;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+
+    .falling-image {
+      margin-top: 100px;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+    }
+
+    #score-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+    }
+
+    #timer-container {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+    }
+
+    #restart-button {
+      position: fixed;
+      top: 50%;
+      border: 1px solid;
+      padding: 8px;
+      border-image: linear-gradient(45deg, purple, orange)1;
+      left: 50%;
+      color: #FFF;
+      animation: glow-light 3s infinite;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+    }
+
+    @keyframes glow-light {
+      0% { background: #befc87; }
+      25% { background: #e40124; }
+      50% { background: #800080; }
+      75% { background: #605fff; }
+      100% { background: #07ffea; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+  <div id="score-container">Score: <span id="score">0</span></div>
+  <div id="timer-container">Time Left: <span id="timer">0:30</span></div>
+  <div id="restart-button" onclick="startGame()">Restart</div>
+
+  <script>
+    const images = [
+      { src: 'Candy1.png', points: 5 },
+      { src: 'Candy2.webp', points: 4 },
+      { src: 'Candy3.webp', points: 3 },
+      { src: 'Candy4.webp', points: 9 },
+      { src: 'Candy5.png', points: 8 },
+    ];
+
+    let score = 0;
+    let gameTime = 30 * 1000; // 30 seconds in milliseconds
+
+    function startGame() {
+      score = 0;
+      updateTime();
+      updateScore();
+      document.getElementById('game-container').innerHTML = '';
+      setTimeout(() => {
+        document.getElementById('game-container').innerHTML = '';
+        alert('Game Over! Your Score: ' + score);
+      }, gameTime);
+      setInterval(() => createFallingImages(), 1000);
+    }
+
+    function createFallingImages() {
+      const numImages = 3; // Change this value to control the number of images dropping simultaneously
+      for (let i = 0; i < numImages; i++) {
+        createFallingImage();
+      }
+    }
+
+    function createFallingImage() {
+      const imageIndex = Math.floor(Math.random() * images.length);
+      const image = images[imageIndex];
+
+      const imgElement = document.createElement('img');
+      imgElement.src = image.src;
+      imgElement.classList.add('falling-image');
+      
+      // Set left position to a random position within the window width
+      imgElement.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+
+      imgElement.onclick = () => {
+        score += image.points;
+        updateScore();
+        document.getElementById('game-container').removeChild(imgElement);
+      };
+
+      document.getElementById('game-container').appendChild(imgElement);
+
+      setTimeout(() => {
+        if (imgElement.parentNode) {
+          document.getElementById('game-container').removeChild(imgElement);
+        }
+      }, gameTime);
+    }
+
+    function updateScore() {
+      document.getElementById('score').innerText = score;
+    }
+
+    function updateTime() {
+      let timeLeft = gameTime / 1000;
+      const timerElement = document.getElementById('timer');
+
+      const updateTimer = () => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = Math.floor(timeLeft % 60);
+        timerElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      };
+
+      updateTimer();
+
+      const timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          clearInterval(timerInterval);
+        }
+        updateTimer();
+      }, 1000);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
